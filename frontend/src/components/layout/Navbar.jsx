@@ -1,23 +1,21 @@
-
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   Gift,
-  UserRound,
-  ShoppingCart,
+  LogOut,
+  ShieldCheck,
   ShoppingBag,
-  Sparkles
+  ShoppingCart,
+  Sparkles,
+  UserRound,
 } from "lucide-react";
-
 import useAuth from "../../hooks/useAuth";
 
 const linkClass = ({ isActive }) =>
-  `flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full
-   text-sm font-extrabold transition-all duration-200
-   ${
-     isActive
-       ? "bg-[#B93428] text-[#FFE0C8] border-2 border-[#3D2530] shadow-[3px_3px_0px_#3D2530]"
-       : "text-[#3D2530] hover:bg-[#FFE0C8]"
-   }`;
+  `flex items-center gap-2 rounded-full px-2.5 py-2 text-sm font-extrabold transition-all duration-200 sm:px-4 ${
+    isActive
+      ? "border-2 border-ink bg-brand text-peach shadow-[3px_3px_0_var(--color-ink)]"
+      : "border-2 border-transparent text-ink hover:bg-cream"
+  }`;
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -29,98 +27,68 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50
-      bg-[#FFE0C8] border-b-2 border-[#E88B83]
-      shadow-[0_4px_12px_rgba(61,37,48,0.08)]">
-
-      <div className="mx-auto max-w-[1440px]
-        h-[76px] px-5 md:px-10
-        flex items-center justify-between">
-
+    <header className="sticky top-0 z-50 border-b-2 border-coral bg-peach shadow-[0_4px_12px_rgba(61,37,48,0.08)]">
+      <div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-3 sm:h-[76px] sm:px-5 md:px-10">
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-
-          <Gift
-            size={34}
-            strokeWidth={2.8}
-            className="text-[#B93428]"
-          />
-
+        <Link to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <Gift className="h-7 w-7 text-brand sm:h-9 sm:w-9" strokeWidth={2.8} />
           <div>
-            <p className="font-['Baloo_2']
-              text-3xl font-extrabold
-              leading-none text-[#B93428]">
-              Tadaa<span className="text-[#F6D44A]">✦</span>
+            <p className="font-display text-2xl font-extrabold leading-none text-brand sm:text-3xl">
+              Tadaa<span className="text-sun">✦</span>
             </p>
-
-            <p className="hidden sm:block
-              text-[10px] font-extrabold
-              text-[#65434B]">
+            <p className="hidden text-[10px] font-extrabold text-ink-soft sm:block">
               Kholo aur dekho kya nikla
             </p>
           </div>
         </Link>
 
-        {/* NAVIGATION */}
-        <nav className="flex items-center gap-2 md:gap-4">
-
-          <NavLink
-            to="/products"
-            className={linkClass}
-          >
-            <ShoppingBag size={17} />
+        {/* NAV */}
+        <nav className="flex items-center gap-0.5 sm:gap-2 md:gap-3">
+          <NavLink to="/products" className={linkClass} aria-label="Products">
+            <ShoppingBag size={18} strokeWidth={2.6} />
             <span className="hidden sm:inline">Products</span>
           </NavLink>
 
-          <NavLink
-            to="/mystery"
-            className={linkClass}
-          >
-            <Gift size={17} />
-            <span>Mystery</span>
+          <NavLink to="/mystery" className={linkClass} aria-label="Mystery">
+            <Gift size={18} strokeWidth={2.6} />
+            <span className="hidden sm:inline">Mystery</span>
           </NavLink>
+
+          {user?.role === "admin" && (
+            <NavLink to="/admin/products" className={linkClass} aria-label="Admin">
+              <ShieldCheck size={18} strokeWidth={2.6} />
+              <span className="hidden sm:inline">Admin</span>
+            </NavLink>
+          )}
 
           {user ? (
             <>
-              <span className="hidden lg:block
-                text-sm font-bold text-[#65434B]">
+              <span className="hidden text-sm font-bold text-ink-soft lg:block">
                 Hi, {user.name}
               </span>
-
               <button
                 onClick={handleLogout}
-                className="rounded-full border-2
-                  border-[#3D2530] px-4 py-2
-                  text-sm font-extrabold
-                  text-[#3D2530] bg-[#FFE0C8]
-                  hover:bg-[#F6B98F] transition"
+                aria-label="Logout"
+                className="flex items-center gap-2 rounded-full border-2 border-ink bg-peach px-2.5 py-2 text-sm font-extrabold text-ink transition hover:bg-sand sm:px-4"
               >
-                Logout
+                <LogOut size={17} strokeWidth={2.6} />
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </>
           ) : (
             <>
-              <NavLink
-                to="/login"
-                className={linkClass}
-              >
-                <UserRound size={17} />
-                <span>Login</span>
+              <NavLink to="/login" className={linkClass} aria-label="Login">
+                <UserRound size={18} strokeWidth={2.6} />
+                <span className="hidden sm:inline">Login</span>
               </NavLink>
 
               <Link
                 to="/signup"
-                className="flex items-center gap-2
-                  rounded-xl border-2 border-[#3D2530]
-                  bg-[#B93428] text-[#FFE0C8]
-                  px-4 py-2 text-sm font-extrabold
-                  shadow-[3px_3px_0px_#3D2530]
-                  hover:-translate-y-0.5
-                  active:translate-y-0.5
-                  active:shadow-none transition-all"
+                aria-label="Sign Up"
+                className="flex items-center gap-2 rounded-xl border-2 border-ink bg-brand px-2.5 py-2 text-sm font-extrabold text-peach shadow-[3px_3px_0_var(--color-ink)] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none sm:px-4"
               >
-                <Sparkles size={16} />
-                Sign Up
+                <Sparkles size={17} strokeWidth={2.6} />
+                <span className="hidden sm:inline">Sign Up</span>
               </Link>
             </>
           )}
@@ -129,17 +97,10 @@ export default function Navbar() {
           <Link
             to="/cart"
             aria-label="Shopping cart"
-            className="ml-1 relative flex items-center
-              justify-center w-11 h-11 rounded-full
-              bg-[#FFE0C8] border-2 border-[#3D2530]
-              hover:bg-[#F6B98F] transition"
+            className="relative ml-0.5 flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink bg-peach transition hover:bg-sand sm:ml-1 sm:h-11 sm:w-11"
           >
-            <ShoppingCart
-              size={21}
-              className="text-[#3D2530]"
-            />
+            <ShoppingCart size={20} className="text-ink" strokeWidth={2.6} />
           </Link>
-
         </nav>
       </div>
     </header>

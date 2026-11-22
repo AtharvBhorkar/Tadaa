@@ -7,6 +7,7 @@ import Products from "./pages/Products";
 import Mystery from "./pages/Mystery";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import AdminProducts from "./pages/admin/AdminProducts";
 
 export default function App() {
   return (
@@ -27,6 +28,14 @@ export default function App() {
             />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route
+              path="/admin/products"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminProducts />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </main>
       </AuthProvider>
