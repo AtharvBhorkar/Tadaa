@@ -13,7 +13,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Navbar />
-        <main className="min-h-screen bg-gray-50">
+        <main className="min-h-screen">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />

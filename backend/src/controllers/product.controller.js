@@ -4,10 +4,28 @@ const Product = require("../models/Product");
 const PUBLIC_FIELDS = "-costPrice -deodapLink";
 
 exports.getProducts = async (req, res) => {
-  const { category, q, page = 1, limit = 12 } = req.query;
+  const { category, q, page = 1, limit = 12, minPrice, maxPrice, sort, badge, deals } = req.query;
   const filter = { isActive: true };
   if (category) filter.category = category;
   if (q) filter.$text = { $search: q };
+  if (badge) filter.badge = badge;
+  if (deals === "true") filter.$expr = { $gt: ["$mrp", "$price"] };
+
+  const min = Number(minPrice);
+  const max = Number(maxPrice);
+  if ((minPrice && Number.isFinite(min)) || (maxPrice && Number.isFinite(max))) {
+    filter.price = {};
+    if (minPrice && Number.isFinite(min)) filter.price.$gte = min;
+    if (maxPrice && Number.isFinite(max)) filter.price.$lte = max;
+  }
+
+  const sortMap = {
+    popular: { ratingCount: -1, createdAt: -1 },
+    new: { createdAt: -1 },
+    "price-asc": { price: 1 },
+    "price-desc": { price: -1 },
+    rating: { rating: -1, ratingCount: -1 },
+  };
 
   const pageNum = Math.max(parseInt(page) || 1, 1);
   const limitNum = Math.min(parseInt(limit) || 12, 50);
@@ -15,7 +33,7 @@ exports.getProducts = async (req, res) => {
   const [items, total] = await Promise.all([
     Product.find(filter)
       .select(PUBLIC_FIELDS)
-      .sort({ createdAt: -1 })
+      .sort(sortMap[sort] || sortMap.popular)
       .skip((pageNum - 1) * limitNum)
       .limit(limitNum),
     Product.countDocuments(filter),

@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { TOKEN_KEY } from "../api/axios";
 import { getMeApi, loginApi, signupApi } from "../api/auth.api";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
 const normalize = (u) => ({ ...u, id: u.id || u._id });
