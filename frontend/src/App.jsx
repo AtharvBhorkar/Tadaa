@@ -9,11 +9,13 @@ import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import Orders from "./pages/Orders";
 import Mystery from "./pages/Mystery";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminPrizePool from "./pages/admin/AdminPrizePool";
+import AdminOrders from "./pages/admin/AdminOrders";
 
 export default function App() {
   return (
@@ -43,6 +45,14 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route
@@ -58,6 +68,14 @@ export default function App() {
               element={
                 <ProtectedRoute adminOnly>
                   <AdminPrizePool />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminOrders />
                 </ProtectedRoute>
               }
             />

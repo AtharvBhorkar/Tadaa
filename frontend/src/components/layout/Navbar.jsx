@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   Gift,
   LogOut,
+  Package,
   ShieldCheck,
   ShoppingBag,
   ShoppingCart,
@@ -56,8 +57,15 @@ export default function Navbar() {
             <span className="hidden sm:inline">Mystery</span>
           </NavLink>
 
+          {user && (
+            <NavLink to="/orders" className={linkClass} aria-label="Orders">
+              <Package size={18} strokeWidth={2.6} />
+              <span className="hidden sm:inline">Orders</span>
+            </NavLink>
+          )}
+
           {user?.role === "admin" && (
-            <NavLink to="/admin/products" className={linkClass} aria-label="Admin">
+            <NavLink to="/admin/orders" className={linkClass} aria-label="Admin">
               <ShieldCheck size={18} strokeWidth={2.6} />
               <span className="hidden sm:inline">Admin</span>
             </NavLink>

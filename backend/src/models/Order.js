@@ -38,6 +38,8 @@ const orderSchema = new mongoose.Schema(
     paymentId: { type: String, default: "" },
     paidAt: Date,
     trackingId: { type: String, default: "" },
+    shippedAt: Date,
+    deliveredAt: Date,
   },
   { timestamps: true }
 );

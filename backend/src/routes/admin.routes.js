@@ -26,4 +26,9 @@ router.post("/mystery/pool", mystery.addPrize);
 router.put("/mystery/pool/:id", mystery.updatePrize);
 router.delete("/mystery/pool/:id", mystery.deletePrize);
 
+const adminOrders = require("../controllers/adminOrder.controller");
+
+router.get("/orders", adminOrders.adminGetOrders);
+router.put("/orders/:id", adminOrders.adminUpdateOrder);
+
 module.exports = router;

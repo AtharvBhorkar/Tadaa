@@ -11,3 +11,6 @@ export const addPrizeApi = (data) => api.post("/admin/mystery/pool", data).then(
 export const updatePrizeApi = (id, weight) =>
   api.put(`/admin/mystery/pool/${id}`, { weight }).then((r) => r.data);
 export const deletePrizeApi = (id) => api.delete(`/admin/mystery/pool/${id}`).then((r) => r.data);
+export const adminGetOrders = (params) => api.get("/admin/orders", { params }).then((r) => r.data);
+export const adminUpdateOrderApi = (id, data) =>
+  api.put(`/admin/orders/${id}`, data).then((r) => r.data);

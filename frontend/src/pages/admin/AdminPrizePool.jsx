@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AdminNav from "../../components/layout/AdminNav";
 import { AlertTriangle, Plus, Trash2 } from "lucide-react";
 import {
   adminGetLevels,
@@ -244,6 +245,7 @@ export default function AdminPrizePool() {
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-6 md:px-8">
+      <AdminNav />
       <h1 className="font-display text-3xl font-extrabold">Admin: Prize Pool</h1>
       <p className="text-sm font-bold text-ink-soft">
         Weight is relative: chance = weight / total weight of live prizes in that level.{" "}
