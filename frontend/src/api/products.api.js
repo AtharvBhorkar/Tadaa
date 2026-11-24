@@ -10,3 +10,5 @@ export const fetchProductReviews = (id, params) =>
   api.get(`/products/${id}/reviews`, { params }).then((r) => r.data);
 export const fetchProductsByIds = (ids) =>
   api.get("/products/by-ids", { params: { ids: ids.join(",") } }).then((r) => r.data.items);
+export const createReviewApi = (productId, data) =>
+  api.post(`/products/${productId}/reviews`, data).then((r) => r.data);

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AdminNav from "../../components/layout/AdminNav";
 import { adminGetOrders, adminUpdateOrderApi } from "../../api/admin.api";
 import { getErrorMessage } from "../../api/axios";
 import { formatPrice } from "../../utils/formatPrice";
@@ -39,16 +38,14 @@ const fmtDate = (d) =>
 
 function OrderCard({ order, busy, onUpdate }) {
   const [tracking, setTracking] = useState(order.trackingId || "");
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const words = reason.trim().split(/\s+/).filter(Boolean).length;
   const itemMargin = order.subtotal - order.cost;
 
-  const cancel = () => {
-    const warn =
-      order.status === "pending_payment"
-        ? ""
-        : " The customer has already paid, so you must refund them manually from the payment gateway.";
-    if (window.confirm(`Cancel this order? Stock will be restored.${warn}`)) {
-      onUpdate(order._id, { status: "cancelled" });
-    }
+  const submitCancel = () => {
+    if (words < 6) return;
+    onUpdate(order._id, { status: "cancelled", reason: reason.trim() });
   };
 
   return (
@@ -108,6 +105,26 @@ function OrderCard({ order, busy, onUpdate }) {
         </span>
       </div>
 
+      {order.status === "cancelled" && (
+        <div className="mt-3 rounded-xl border-2 border-dashed border-brand bg-peach p-3 text-sm font-bold">
+          <p className="text-xs font-extrabold uppercase text-brand">
+            Cancelled by{" "}
+            {order.cancelledBy === "user"
+              ? "user"
+              : order.cancelledBy === "admin"
+                ? "admin"
+                : "(not recorded)"}
+            {order.cancelledAt ? ` · ${fmtDate(order.cancelledAt)}` : ""}
+          </p>
+          <p className="mt-1 whitespace-pre-wrap break-words">
+            {order.cancelReason || "No reason recorded."}
+          </p>
+          {order.paidAt && (
+            <p className="mt-1 text-xs text-ink-soft">Customer had paid, refund manually.</p>
+          )}
+        </div>
+      )}
+
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {order.status === "paid" && (
           <button
@@ -157,11 +174,43 @@ function OrderCard({ order, busy, onUpdate }) {
         )}
 
         {["pending_payment", "paid", "ordered"].includes(order.status) && (
-          <button disabled={busy} onClick={cancel} className={`${btn} ml-auto bg-cream text-brand hover:bg-peach`}>
+          <button disabled={busy} onClick={() => setCancelOpen((v) => !v)} className={`${btn} ml-auto bg-cream text-brand hover:bg-peach`}>
             Cancel order
           </button>
         )}
       </div>
+      {cancelOpen && (
+        <div className="mt-3 rounded-xl border-2 border-ink/30 bg-peach p-3">
+          <p className="text-xs font-extrabold text-ink-soft">
+            This reason will be shown to the customer (minimum 6 words). Stock will be restored.
+            {order.status !== "pending_payment" &&
+              " Customer has already paid, so refund them manually from the payment gateway."}
+          </p>
+          <textarea
+            rows={3}
+            maxLength={500}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Write the cancellation reason..."
+            className={`${inputClass} mt-2 w-full`}
+          />
+          <p className={`mt-1 text-xs font-extrabold ${words >= 6 ? "text-green-700" : "text-brand"}`}>
+            {words} / 6 words
+          </p>
+          <div className="mt-2 flex gap-2">
+            <button onClick={() => setCancelOpen(false)} className={`${btn} bg-cream hover:bg-peach`}>
+              Close
+            </button>
+            <button
+              disabled={busy || words < 6}
+              onClick={submitCancel}
+              className={`${btn} bg-brand text-peach`}
+            >
+              Confirm cancel
+            </button>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
@@ -206,7 +255,6 @@ export default function AdminOrders() {
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-6 md:px-8">
-      <AdminNav />
       <h1 className="font-display text-3xl font-extrabold">Admin: Orders</h1>
 
       <div className="mt-4 flex flex-wrap gap-2">

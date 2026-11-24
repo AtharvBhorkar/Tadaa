@@ -2,7 +2,6 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   Gift,
   LogOut,
-  Package,
   ShieldCheck,
   ShoppingBag,
   ShoppingCart,
@@ -58,9 +57,9 @@ export default function Navbar() {
           </NavLink>
 
           {user && (
-            <NavLink to="/orders" className={linkClass} aria-label="Orders">
-              <Package size={18} strokeWidth={2.6} />
-              <span className="hidden sm:inline">Orders</span>
+            <NavLink to="/account" className={linkClass} aria-label="Account">
+              <UserRound size={18} strokeWidth={2.6} />
+              <span className="hidden sm:inline">Account</span>
             </NavLink>
           )}
 

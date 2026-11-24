@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const Review = require("../models/Review");
 const { SHIPPING_FEE, MAX_QTY, MAX_LINES, validateAddress } = require("../utils/orderRules");
 const { DEV_FAKE_PAYMENT } = require("../config/env");
 
@@ -87,8 +88,20 @@ exports.createOrder = async (req, res) => {
 };
 
 exports.getMyOrders = async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 }).select(HIDE_COST);
-  res.json({ orders });
+  const orders = await Order.find({ user: req.user._id })
+    .sort({ createdAt: -1 })
+    .select(HIDE_COST)
+    .lean();
+
+  const reviews = await Review.find({ user: req.user._id, order: { $in: orders.map((o) => o._id) } })
+    .select("order product")
+    .lean();
+  const byOrder = {};
+  reviews.forEach((r) => {
+    (byOrder[String(r.order)] ||= []).push(String(r.product));
+  });
+
+  res.json({ orders: orders.map((o) => ({ ...o, reviewed: byOrder[String(o._id)] || [] })) });
 };
 
 exports.getOrder = async (req, res) => {
@@ -103,14 +116,27 @@ exports.getOrder = async (req, res) => {
   res.json(isAdmin ? order : publicOrder(order));
 };
 
-// user can cancel only while payment is pending; stock goes back
+const MIN_REASON_WORDS = 15;
+const countWords = (s) => s.split(/\s+/).filter(Boolean).length;
+
+// user can cancel before the order is placed with the supplier; reason (15+ words) is mandatory
 exports.cancelOrder = async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return res.status(400).json({ message: "Invalid order id" });
   }
+  const reason =
+    typeof req.body?.reason === "string" ? req.body.reason.trim().replace(/\s+/g, " ") : "";
+  if (countWords(reason) < MIN_REASON_WORDS) {
+    return res
+      .status(400)
+      .json({ message: `Please give a reason of at least ${MIN_REASON_WORDS} words` });
+  }
+  if (reason.length > 500) {
+    return res.status(400).json({ message: "Reason is too long (max 500 characters)" });
+  }
   const order = await Order.findOneAndUpdate(
-    { _id: req.params.id, user: req.user._id, status: "pending_payment" },
-    { status: "cancelled" },
+    { _id: req.params.id, user: req.user._id, status: { $in: ["pending_payment", "paid"] } },
+    { status: "cancelled", cancelReason: reason, cancelledBy: "user", cancelledAt: new Date() },
     { returnDocument: "after" }
   );
   if (!order) {

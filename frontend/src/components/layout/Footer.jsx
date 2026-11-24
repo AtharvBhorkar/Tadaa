@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Gift } from "lucide-react";
 
 const LINKS = [
@@ -11,6 +11,9 @@ const LINKS = [
 ];
 
 export default function Footer() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <footer className="mt-10 border-t-2 border-coral bg-peach">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 py-8 md:flex-row md:items-start md:justify-between md:px-8">

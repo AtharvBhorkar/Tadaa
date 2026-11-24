@@ -1,6 +1,12 @@
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Review = require("../models/Review");
+const Order = require("../models/Order");
+const User = require("../models/User");
+const PointsLedger = require("../models/PointsLedger");
+
+const REVIEW_POINTS = 10;
+const MIN_REVIEW_CHARS = 10;
 
 const PUBLIC_FIELDS = "-costPrice -deodapLink";
 
@@ -120,6 +126,82 @@ exports.getProductReviews = async (req, res) => {
       breakdown,
     },
   });
+};
+
+exports.createReview = async (req, res) => {
+  const { id } = req.params;
+  const { orderId } = req.body;
+  const rating = Number(req.body.rating);
+  const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+
+  if (!mongoose.isValidObjectId(id) || !mongoose.isValidObjectId(orderId)) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ message: "Please select a rating from 1 to 5" });
+  }
+  if (text.length < MIN_REVIEW_CHARS) {
+    return res
+      .status(400)
+      .json({ message: `Please write at least ${MIN_REVIEW_CHARS} characters in your review` });
+  }
+  if (text.length > 1000) {
+    return res.status(400).json({ message: "Review is too long (max 1000 characters)" });
+  }
+
+  const order = await Order.findOne({ _id: orderId, user: req.user._id, status: "delivered" });
+  if (!order) {
+    return res.status(400).json({ message: "You can review only delivered orders" });
+  }
+  if (!order.items.some((i) => String(i.product) === String(id))) {
+    return res.status(400).json({ message: "This product is not in that order" });
+  }
+
+  let review;
+  try {
+    review = await Review.create({
+      user: req.user._id,
+      product: id,
+      order: order._id,
+      rating,
+      text,
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ message: "You have already reviewed this item" });
+    }
+    throw err;
+  }
+
+  // points only once per order (unique index on the ledger guards against double clicks)
+  let pointsEarned = 0;
+  try {
+    await PointsLedger.create({
+      user: req.user._id,
+      change: REVIEW_POINTS,
+      reason: "review",
+      order: order._id,
+    });
+    await User.updateOne({ _id: req.user._id }, { $inc: { pointsBalance: REVIEW_POINTS } });
+    await Review.updateOne({ _id: review._id }, { pointsGiven: REVIEW_POINTS });
+    pointsEarned = REVIEW_POINTS;
+  } catch (err) {
+    if (err.code !== 11000) throw err;
+  }
+
+  // refresh the product's average rating
+  const agg = await Review.aggregate([
+    { $match: { product: new mongoose.Types.ObjectId(id) } },
+    { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+  ]);
+  if (agg[0]) {
+    await Product.updateOne(
+      { _id: id },
+      { rating: Number(agg[0].avg.toFixed(1)), ratingCount: agg[0].count }
+    );
+  }
+
+  res.status(201).json({ ok: true, pointsEarned });
 };
 
 // ---------- admin ----------

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AdminNav from "../../components/layout/AdminNav";
 import { Eye, EyeOff, Pencil, Plus, Trash2, X } from "lucide-react";
 import {
   adminGetProducts,
@@ -151,7 +150,6 @@ export default function AdminProducts() {
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-6 md:px-8">
-      <AdminNav />
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-extrabold">Admin: Products</h1>

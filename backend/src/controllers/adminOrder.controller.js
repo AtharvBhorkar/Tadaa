@@ -17,6 +17,7 @@ exports.adminGetOrders = async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 20, 50);
   const filter = {};
   if (STATUSES.includes(req.query.status)) filter.status = req.query.status;
+  else filter.status = { $ne: "cancelled" }; // "All" tab hides cancelled orders
 
   const [orders, total, counts] = await Promise.all([
     Order.find(filter)
@@ -62,6 +63,21 @@ exports.adminUpdateOrder = async (req, res) => {
         .json({ message: `Can't move an order from "${order.status}" to "${status}"` });
     }
     update.status = status;
+    if (status === "cancelled") {
+      const reason =
+        typeof req.body.reason === "string" ? req.body.reason.trim().replace(/\s+/g, " ") : "";
+      if (reason.split(" ").filter(Boolean).length < 6) {
+        return res
+          .status(400)
+          .json({ message: "Please give a cancellation reason of at least 6 words" });
+      }
+      if (reason.length > 500) {
+        return res.status(400).json({ message: "Reason is too long (max 500 characters)" });
+      }
+      update.cancelledBy = "admin";
+      update.cancelledAt = new Date();
+      update.cancelReason = reason;
+    }
     if (status === "shipped") {
       if (!(trackingId || order.trackingId)) {
         return res.status(400).json({ message: "Tracking ID is required to mark as shipped" });

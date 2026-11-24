@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/layout/Navbar";
@@ -9,7 +9,8 @@ import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import Orders from "./pages/Orders";
+import Account from "./pages/Account";
+import { AdminLayout } from "./components/layout/AdminNav";
 import Mystery from "./pages/Mystery";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -46,15 +47,23 @@ export default function App() {
               }
             />
             <Route
-              path="/orders"
+              path="/account"
               element={
                 <ProtectedRoute>
-                  <Orders />
+                  <Account />
                 </ProtectedRoute>
               }
             />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/orders" element={<Navigate to="/account" replace />} />
+            <Route
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
             <Route
               path="/admin/products"
               element={
@@ -79,6 +88,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            </Route>
           </Routes>
         </main>
         <Footer />

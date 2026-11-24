@@ -4,7 +4,7 @@ import { CheckCircle2, Truck } from "lucide-react";
 import useAuth from "../hooks/useAuth";
 import useCart from "../hooks/useCart";
 import { fetchProductsByIds } from "../api/products.api";
-import { cancelOrderApi, createOrderApi, fetchOrderConfig, payTestApi } from "../api/orders.api";
+import { createOrderApi, fetchOrderConfig, payTestApi } from "../api/orders.api";
 import { getErrorMessage } from "../api/axios";
 import { formatPrice } from "../utils/formatPrice";
 import Loader from "../components/common/Loader";
@@ -167,13 +167,12 @@ export default function Checkout() {
                   Online payment will be enabled soon.
                 </p>
               )}
-              <button
-                disabled={busy}
-                onClick={() => act(cancelOrderApi)}
-                className="w-full rounded-xl border-2 border-ink bg-cream px-5 py-2.5 text-sm font-extrabold hover:bg-peach disabled:opacity-60"
+              <Link
+                to="/account"
+                className="block w-full rounded-xl border-2 border-ink bg-cream px-5 py-2.5 text-center text-sm font-extrabold hover:bg-peach"
               >
-                Cancel order
-              </button>
+                View / cancel in Account
+              </Link>
             </div>
           )}
 

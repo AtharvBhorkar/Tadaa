@@ -13,4 +13,10 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// one review per product per order
+reviewSchema.index(
+  { order: 1, product: 1 },
+  { unique: true, partialFilterExpression: { order: { $exists: true } } }
+);
+
 module.exports = mongoose.model("Review", reviewSchema);
