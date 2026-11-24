@@ -60,7 +60,7 @@ export default function Login() {
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-gray-500">
-        Account nahi hai?{" "}
+        Don't have an account?{" "}
         <Link to="/signup" className="font-medium text-violet-600">Sign up</Link>
       </p>
     </div>

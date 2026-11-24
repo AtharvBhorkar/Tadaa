@@ -47,7 +47,7 @@ export default function Signup() {
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-gray-500">
-        Pehle se account hai?{" "}
+        Already have an account?{" "}
         <Link to="/login" className="font-medium text-violet-600">Login</Link>
       </p>
     </div>

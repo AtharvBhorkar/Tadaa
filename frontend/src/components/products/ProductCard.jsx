@@ -1,4 +1,7 @@
-import { Flame, ShoppingCart, Sparkles, Star } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Check, Flame, ShoppingCart, Sparkles, Star } from "lucide-react";
+import useCart from "../../hooks/useCart";
 import { formatPrice } from "../../utils/formatPrice";
 
 const BADGES = {
@@ -10,6 +13,13 @@ const BADGES = {
 const formatCount = (n) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : n);
 
 export default function ProductCard({ product }) {
+  const { add } = useCart();
+  const [added, setAdded] = useState(false);
+  const onAdd = () => {
+    add(product._id);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1200);
+  };
   const outOfStock = product.stock <= 0;
   const off =
     product.mrp > product.price
@@ -18,7 +28,7 @@ export default function ProductCard({ product }) {
   const badge = BADGES[product.badge];
 
   return (
-    <article className="flex flex-col rounded-3xl border-2 border-[#F2B1A8] bg-cream p-3 shadow-[0_6px_16px_rgba(185,52,40,0.12)] transition hover:-translate-y-1 hover:shadow-[0_10px_22px_rgba(185,52,40,0.2)]">
+    <article className="relative flex flex-col rounded-3xl border-2 border-[#F2B1A8] bg-cream p-3 shadow-[0_6px_16px_rgba(185,52,40,0.12)] transition hover:-translate-y-1 hover:shadow-[0_10px_22px_rgba(185,52,40,0.2)]">
       <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-[#FFE4CE]">
         {product.images?.[0] ? (
           <img
@@ -56,7 +66,9 @@ export default function ProductCard({ product }) {
       </div>
 
       <h3 className="mt-3 line-clamp-1 text-sm font-extrabold text-ink">
-        {product.title}
+        <Link to={`/products/${product._id}`} className="after:absolute after:inset-0">
+          {product.title}
+        </Link>
       </h3>
 
       <div className="mt-0.5 flex min-h-5 items-center gap-1 text-xs font-bold text-ink-soft">
@@ -85,10 +97,11 @@ export default function ProductCard({ product }) {
         <button
           type="button"
           disabled={outOfStock}
+          onClick={onAdd}
           aria-label={`Add ${product.title} to cart`}
-          className="grid h-10 w-10 place-items-center rounded-xl border-2 border-ink bg-violet text-white shadow-[2px_2px_0_var(--color-ink)] transition hover:bg-violet-dark active:translate-y-0.5 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
+          className="relative z-10 grid h-10 w-10 place-items-center rounded-xl border-2 border-ink bg-violet text-white shadow-[2px_2px_0_var(--color-ink)] transition hover:bg-violet-dark active:translate-y-0.5 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ShoppingCart size={18} strokeWidth={2.6} />
+          {added ? <Check size={18} strokeWidth={3} /> : <ShoppingCart size={18} strokeWidth={2.6} />}
         </button>
       </div>
     </article>

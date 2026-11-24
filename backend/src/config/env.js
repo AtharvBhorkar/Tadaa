@@ -13,4 +13,6 @@ module.exports = {
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:5173",
+  // local testing only: lets the test "Pay" button mark an order paid
+  DEV_FAKE_PAYMENT: process.env.DEV_FAKE_PAYMENT === "true",
 };

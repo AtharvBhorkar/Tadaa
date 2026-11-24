@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
-import { Eye, EyeOff, Pencil, Plus, X } from "lucide-react";
-import { adminGetProducts, createProductApi, updateProductApi } from "../../api/admin.api";
+import { Link } from "react-router-dom";
+import { Eye, EyeOff, Pencil, Plus, Trash2, X } from "lucide-react";
+import {
+  adminGetProducts,
+  createProductApi,
+  updateProductApi,
+  deleteProductApi,
+} from "../../api/admin.api";
 import { getErrorMessage } from "../../api/axios";
 import { formatPrice } from "../../utils/formatPrice";
 import Loader from "../../components/common/Loader";
@@ -24,8 +30,7 @@ const EMPTY = {
   category: "Gadgets",
   stock: "",
   badge: "",
-  images: "",
-  deodapLink: "",
+  images: ["", "", "", "", ""],
   isActive: true,
 };
 
@@ -38,8 +43,7 @@ const toForm = (p) => ({
   category: p.category,
   stock: p.stock,
   badge: p.badge || "",
-  images: (p.images || []).join("\n"),
-  deodapLink: p.deodapLink || "",
+  images: Array.from({ length: 5 }, (_, i) => (p.images || [])[i] || ""),
   isActive: p.isActive,
 });
 
@@ -93,9 +97,13 @@ export default function AdminProducts() {
 
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
+  const setImage = (i, value) =>
+    setForm({ ...form, images: form.images.map((v, idx) => (idx === i ? value : v)) });
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
+    const imgs = form.images.map((s) => s.trim()).filter(Boolean);
     setSaving(true);
     const payload = {
       title: form.title.trim(),
@@ -106,8 +114,7 @@ export default function AdminProducts() {
       category: form.category,
       stock: Number(form.stock) || 0,
       badge: form.badge,
-      images: form.images.split("\n").map((s) => s.trim()).filter(Boolean),
-      deodapLink: form.deodapLink.trim(),
+      images: imgs,
       isActive: form.isActive,
     };
     try {
@@ -131,12 +138,27 @@ export default function AdminProducts() {
     }
   };
 
+  const onDelete = async (p) => {
+    if (!window.confirm(`Permanently delete "${p.title}"? This cannot be undone.`)) return;
+    try {
+      await deleteProductApi(p._id);
+      refresh();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-6 md:px-8">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-extrabold">Admin: Products</h1>
-          <p className="text-sm font-bold text-ink-soft">{items.length} products</p>
+          <p className="text-sm font-bold text-ink-soft">
+            {items.length} products ·{" "}
+            <Link to="/admin/prize-pool" className="text-violet underline">
+              Prize pool
+            </Link>
+          </p>
         </div>
         <button
           onClick={openNew}
@@ -216,6 +238,13 @@ export default function AdminProducts() {
                         >
                           {p.isActive ? <EyeOff size={16} strokeWidth={2.6} /> : <Eye size={16} strokeWidth={2.6} />}
                         </button>
+                        <button
+                          onClick={() => onDelete(p)}
+                          aria-label="Delete"
+                          className="grid h-9 w-9 place-items-center rounded-lg border-2 border-ink bg-cream text-brand hover:bg-brand hover:text-white"
+                        >
+                          <Trash2 size={16} strokeWidth={2.6} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -224,7 +253,7 @@ export default function AdminProducts() {
               {!items.length && (
                 <tr>
                   <td colSpan={8} className="p-10 text-center font-bold text-ink-soft">
-                    Abhi koi product nahi. "Add product" dabaa.
+                    No products yet. Click "Add product".
                   </td>
                 </tr>
               )}
@@ -296,14 +325,33 @@ export default function AdminProducts() {
               </Field>
             </div>
 
-            <Field label="Image URLs (ek line me ek)">
-              <textarea rows={3} value={form.images} onChange={set("images")} className={inputClass} />
-            </Field>
-
-            <Field label="DeoDap link (sirf tere liye, public nahi dikhta)">
-              <input value={form.deodapLink} onChange={set("deodapLink")} className={inputClass} />
-            </Field>
-
+            <div>
+              <span className="mb-1 block text-xs font-extrabold text-ink-soft">
+                Images (max 5, first one is the main image)
+              </span>
+              <div className="space-y-2">
+                {form.images.map((url, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="w-4 text-xs font-extrabold text-ink-soft">{i + 1}</span>
+                    <input
+                      value={url}
+                      onChange={(e) => setImage(i, e.target.value)}
+                      placeholder={i === 0 ? "Main image URL" : "Image URL (optional)"}
+                      className={inputClass}
+                    />
+                    {url.trim() ? (
+                      <img
+                        src={url.trim()}
+                        alt=""
+                        className="h-9 w-9 shrink-0 rounded-lg border-2 border-ink/20 object-cover"
+                      />
+                    ) : (
+                      <div className="h-9 w-9 shrink-0 rounded-lg bg-cream" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
             <label className="flex items-center gap-2 text-sm font-extrabold">
               <input
                 type="checkbox"
@@ -311,7 +359,7 @@ export default function AdminProducts() {
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                 className="h-4 w-4 accent-violet"
               />
-              Live (store pe dikhe)
+              Live (visible in store)
             </label>
 
             <div className="flex justify-end gap-3 pt-1">

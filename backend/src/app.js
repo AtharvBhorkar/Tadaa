@@ -14,6 +14,8 @@ app.get("/api/health", (req, res) => res.json({ status: "ok", app: "Tadaa" }));
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/products", require("./routes/product.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/mystery", require("./routes/mystery.routes"));
+app.use("/api/orders", require("./routes/order.routes"));
 
 app.use(notFound);
 app.use(errorHandler);

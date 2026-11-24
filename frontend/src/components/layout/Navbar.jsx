@@ -9,6 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
+import useCart from "../../hooks/useCart";
 
 const linkClass = ({ isActive }) =>
   `flex items-center gap-2 rounded-full px-2.5 py-2 text-sm font-extrabold transition-all duration-200 sm:px-4 ${
@@ -19,6 +20,7 @@ const linkClass = ({ isActive }) =>
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { count } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -37,7 +39,7 @@ export default function Navbar() {
               Tadaa<span className="text-sun">✦</span>
             </p>
             <p className="hidden text-[10px] font-extrabold text-ink-soft sm:block">
-              Kholo aur dekho kya nikla
+              Open it and see what you get
             </p>
           </div>
         </Link>
@@ -100,6 +102,11 @@ export default function Navbar() {
             className="relative ml-0.5 flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink bg-peach transition hover:bg-sand sm:ml-1 sm:h-11 sm:w-11"
           >
             <ShoppingCart size={20} className="text-ink" strokeWidth={2.6} />
+            {count > 0 && (
+              <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full border-2 border-ink bg-sun px-1 text-[10px] font-extrabold">
+                {count}
+              </span>
+            )}
           </Link>
         </nav>
       </div>

@@ -42,7 +42,9 @@ export default function Products() {
 
   const [q, setQ] = useState("");
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(
+    () => new URLSearchParams(window.location.search).get("category") || ""
+  );
   const [chip, setChip] = useState("all");
   const [sort, setSort] = useState("popular");
   const [priceInput, setPriceInput] = useState(EMPTY_PRICE);

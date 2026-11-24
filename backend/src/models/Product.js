@@ -10,7 +10,10 @@ const productSchema = new mongoose.Schema(
     rating: { type: Number, min: 0, max: 5, default: 0 },
     ratingCount: { type: Number, min: 0, default: 0 },
     badge: { type: String, enum: ["", "new", "best", "rare"], default: "" },
-    images: [{ type: String }],
+    images: {
+      type: [String],
+      validate: [(arr) => arr.length <= 5, "A product can have at most 5 images"],
+    },
     category: { type: String, trim: true, default: "General" },
     stock: { type: Number, default: 0, min: 0 },
     deodapLink: { type: String, trim: true, default: "" },

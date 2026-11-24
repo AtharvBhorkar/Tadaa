@@ -6,8 +6,8 @@ export default function ProductGrid({ products }) {
     return (
       <div className="flex flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-coral py-16 text-center">
         <PackageOpen size={48} className="text-brand" />
-        <p className="font-display text-xl font-extrabold">Koi product nahi mila</p>
-        <p className="text-sm font-bold text-ink-soft">Filters ya search badal ke dekh</p>
+        <p className="font-display text-xl font-extrabold">No products found</p>
+        <p className="text-sm font-bold text-ink-soft">Try changing your filters or search</p>
       </div>
     );
   }
